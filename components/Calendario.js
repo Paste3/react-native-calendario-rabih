@@ -1,55 +1,75 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Text, Button, Platform } from 'react-native';
-import * as Calendar from 'expo-calendar';
+import React from 'react';
+import { useState } from 'react';
+import {
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+} from 'react-native';
+import { Agenda } from 'react-native-calendars';
 
-export default function Calendario() {
-    useEffect(() => {
-        (async () => {
-            const { status } = await Calendar.requestCalendarPermissionsAsync();
-            if (status === 'granted') {
-                const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-                console.log('Here are all your calendars:');
-                console.log({ calendars });
-            }
-        })();
-    }, []);
-
+function Calendario() {
+    const [año,setAño] = useState("")
+    var anotaciones = {
+        "2022-12-04": [{ name: "RABIH4" }],
+        "2022-12-05": [{ name: "RABIH5" }],
+        "2022-12-06": [{ name: "RABIH6" }],
+        "2022-12-07": [{ name: "RABIH7" }],
+        "2022-12-08": [{ name: "RABIH8" }]
+    }
+    function eliminarTarea() {
+        console.log(año)
+        delete anotaciones[año]
+    }
     return (
-        <View style={styles.container}>
-            <Text>Calendar Module Example</Text>
-            <Button title="Create a new calendar" onPress={createCalendar} />
-        </View>
+        <>
+            <SafeAreaView style={styles.container}>
+                <Agenda
+                    selected="2022-12-01"
+                    items={anotaciones}
+                    onDayPress={day => {
+                        console.log(day)
+                        setAño(day.dateString)
+                    }}
+                    renderItem={(item, isFirst) => (
+                        <TouchableOpacity style={styles.item}>
+                            <Text style={styles.itemText}>{item.name}</Text>
+                            <TouchableOpacity style={styles.roundButton1} title="Eliminar tarea" onClick={eliminarTarea()}><Text>Eliminar tarea</Text></TouchableOpacity>
+                        </TouchableOpacity>
+                    )}
+                />
+            </SafeAreaView>
+        </>
     );
-}
-
-async function getDefaultCalendarSource() {
-    const defaultCalendar = await Calendar.getDefaultCalendarAsync();
-    return defaultCalendar.source;
-}
-
-async function createCalendar() {
-    const defaultCalendarSource =
-        Platform.OS === 'ios'
-            ? await getDefaultCalendarSource()
-            : { isLocalAccount: true, name: 'Expo Calendar' };
-    const newCalendarID = await Calendar.createCalendarAsync({
-        title: 'Expo Calendar',
-        color: 'blue',
-        entityType: Calendar.EntityTypes.EVENT,
-        sourceId: defaultCalendarSource.id,
-        source: defaultCalendarSource,
-        name: 'internalCalendarName',
-        ownerAccount: 'personal',
-        accessLevel: Calendar.CalendarAccessLevel.OWNER,
-    });
-    console.log(`Your new calendar ID is: ${newCalendarID}`);
-}
+};
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 20,
         flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'center'
     },
+    item: {
+        backgroundColor: 'white',
+        flex: 1,
+        borderRadius: 5,
+        padding: 10,
+        marginRight: 10,
+        marginTop: 17,
+    },
+    itemText: {
+        color: '#888',
+        fontSize: 16,
+    }, roundButton1: {
+        width: 120,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 100,
+        backgroundColor: 'red',
+    }
 });
+
+export default Calendario;
